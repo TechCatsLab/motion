@@ -1,11 +1,11 @@
 package conn
 
 import (
-	"golang.org/x/crypto/ssh"
-
 	"fmt"
 
-	"github.com/zh1014/ssh/config"
+	"golang.org/x/crypto/ssh"
+
+	"github.com/TechCatsLab/motion/ssh-zh/config"
 )
 
 // Client is initialized for create session

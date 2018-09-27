@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/TechCatsLab/motion/ssh/conn"
+	"github.com/TechCatsLab/motion/ssh-zh/conn"
 )
 
 func main() {
