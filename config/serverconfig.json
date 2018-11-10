@@ -1,0 +1,44 @@
+{
+    "format": "#!/bin/bash\nexpect -c \"\nspawn scp %s %s\nexpect {\n\\\"*assword\\\" {set timeout 300; send \\\"%s\\r\\\";}\n}\nexpect eof\"",
+    "os": "ubuntu",
+    "servers": [
+        {
+            "path": "./server1.tar.gz",
+            "exportHost": "10.0.0.21",
+            "host": "localhost",
+            "port": 3306,
+            "image": "mysql:latest",
+            "run_args": {
+                "MYSQL_ROOT_PASSWORD": "123456"
+            },
+            "nginx_location_config": {
+                "/": [
+                    "root html",
+                    "index index.html"
+                ],
+                "/test": [
+                    "root /test/"
+                ]
+            }
+        },
+        {
+            "path": "./server2",
+            "exportHost": "10.0.0.21",
+            "host": "localhost",
+            "port": 6666,
+            "image": "emm:latest",
+            "run_args": {
+                "MYSQL_ROOT_PASSWORD": "123456"
+            },
+            "nginx_location_config": {
+                "/": [
+                    "root html",
+                    "index index.html"
+                ],
+                "/test": [
+                    "root /test/"
+                ]
+            }
+        }
+    ]
+}
