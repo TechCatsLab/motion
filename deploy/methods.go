@@ -1,14 +1,51 @@
 package deploy
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
 
-	"github.com/TechCatsLab/motion/conn"
+	"github.com/TechCatsLab/motion/conn/ssh"
+	"github.com/TechCatsLab/motion/conn/ssh/config"
 )
+
+var EnvConfig struct {
+	Format  string
+	OS      string
+	Servers []*server
+
+	haveDocker bool
+	haveNginx  bool
+}
+
+var con ssh.Client
+
+func init() {
+	con = ssh.New()
+	data, err := ioutil.ReadFile("./serverconfig.json")
+	if err != nil {
+		panic(err)
+	}
+	err = json.Unmarshal(data, &EnvConfig)
+	if err != nil {
+		panic(err)
+	}
+
+	ok, err := haveDocker()
+	if err != nil {
+		panic(err)
+	}
+	EnvConfig.haveDocker = ok
+
+	ok, err = haveNginx()
+	if err != nil {
+		panic(err)
+	}
+	EnvConfig.haveNginx = ok
+}
 
 func zip(dir string, index int) error {
 	return exec.Command("tar", "-zcvf", fmt.Sprintf("~/ready%d.tar.gz", index), dir).Run()
@@ -18,8 +55,9 @@ func rename(file string, index int) error {
 	return exec.Command("mv", file, fmt.Sprintf("~/ready%d.tar.gz", index)).Run()
 }
 
-func writeScript(name, from, to, pass string) error {
-	return ioutil.WriteFile(name, []byte(fmt.Sprintf(EnvConfig.Format, from, to, pass)), os.ModePerm)
+func writeScript(name, from, to string) error {
+	temp := fmt.Sprintf("%s@%s:"+to, config.SSHConf.User, config.SSHConf.Address)
+	return ioutil.WriteFile(name, []byte(fmt.Sprintf(EnvConfig.Format, from, temp, config.SSHConf.Password)), os.ModePerm)
 }
 
 func writeConfig(data string) error {
@@ -73,11 +111,19 @@ func haveSomething(cd, flag string) (bool, error) {
 	return true, nil
 }
 
+func haveDocker() (bool, error) {
+	return haveSomething("docker version", "Version")
+}
+
+func haveNginx() (bool, error) {
+	return haveSomething("netstat -anput | grep nginx", "nginx")
+}
+
 func run(c string) error {
-	_, err := conn.Run(c)
+	_, err := con.Run(c)
 	return err
 }
 
 func output(c string) ([]byte, error) {
-	return conn.Run(c)
+	return con.Run(c)
 }

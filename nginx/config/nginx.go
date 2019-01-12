@@ -1,4 +1,4 @@
-package nginxconfig
+package config
 
 import (
 	"fmt"

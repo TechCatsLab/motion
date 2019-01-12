@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-
-	"github.com/TechCatsLab/motion/config"
 )
 
 func Start() error {
@@ -73,9 +71,7 @@ func after() error {
 }
 
 func trans(from, to string) error {
-	to = fmt.Sprintf("%s@%s:"+to, config.SSHConf.User, config.SSHConf.Address)
-
-	err := writeScript("./script.sh", from, to, config.SSHConf.Password)
+	err := writeScript("./script.sh", from, to)
 	if err != nil {
 		return err
 	}
